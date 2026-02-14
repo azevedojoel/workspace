@@ -84,6 +84,21 @@ export class AuthManager {
   public async getAuthenticatedClient(): Promise<Auth.OAuth2Client> {
     logToFile('getAuthenticatedClient called');
 
+    // When running under LibreChat (or similar), credentials may be passed via env.
+    // Skip keychain/OAuth flow and use env token directly.
+    const envAccessToken =
+      process.env.GOOGLE_ACCESS_TOKEN ||
+      process.env.LIBRECHAT_MCP_OAUTH_ACCESS_TOKEN;
+    if (envAccessToken) {
+      logToFile('Using access token from environment (GOOGLE_ACCESS_TOKEN or LIBRECHAT_MCP_OAUTH_ACCESS_TOKEN)');
+      const oAuth2Client = new google.auth.OAuth2({
+        clientId: getClientId(),
+      });
+      oAuth2Client.setCredentials({ access_token: envAccessToken });
+      this.client = oAuth2Client;
+      return oAuth2Client;
+    }
+
     // Check if we have a cached client with valid credentials
     if (
       this.client &&
