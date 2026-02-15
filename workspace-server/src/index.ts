@@ -19,7 +19,8 @@ import { TimeService } from './services/TimeService';
 import { PeopleService } from './services/PeopleService';
 import { SlidesService } from './services/SlidesService';
 import { SheetsService } from './services/SheetsService';
-import { GMAIL_SEARCH_MAX_RESULTS } from './utils/constants';
+import { TasksService } from './services/TasksService';
+import { GMAIL_SEARCH_MAX_RESULTS, TASKS_LIST_MAX_RESULTS } from './utils/constants';
 import { extractDocId } from './utils/IdUtils';
 
 import { setLoggingEnabled } from './utils/logger';
@@ -106,6 +107,7 @@ async function main() {
   const timeService = new TimeService();
   const slidesService = new SlidesService(authManager);
   const sheetsService = new SheetsService(authManager);
+  const tasksService = new TasksService(authManager);
 
   // 3. Register tools directly on the server
   // Handle tool name normalization (dots to underscores) by default, or use dots if --use-dot-names is passed.
@@ -927,6 +929,251 @@ async function main() {
       },
     },
     chatService.setUpSpace,
+  );
+
+  // Google Tasks tools
+  server.registerTool(
+    'tasks.listTaskLists',
+    {
+      description: 'Lists all of the user\'s Google Tasks task lists.',
+      inputSchema: {
+        maxResults: z
+          .number()
+          .optional()
+          .describe('Maximum number of task lists to return.'),
+        pageToken: z
+          .string()
+          .optional()
+          .describe('Token for the next page of results.'),
+      },
+      ...readOnlyToolProps,
+    },
+    tasksService.listTaskLists,
+  );
+
+  server.registerTool(
+    'tasks.getTaskList',
+    {
+      description: 'Gets a specific task list by ID.',
+      inputSchema: {
+        taskListId: z
+          .string()
+          .describe('The ID of the task list to retrieve.'),
+      },
+      ...readOnlyToolProps,
+    },
+    tasksService.getTaskList,
+  );
+
+  server.registerTool(
+    'tasks.createTaskList',
+    {
+      description: 'Creates a new task list.',
+      inputSchema: {
+        title: z.string().describe('The title of the new task list.'),
+      },
+    },
+    tasksService.createTaskList,
+  );
+
+  server.registerTool(
+    'tasks.updateTaskList',
+    {
+      description: 'Updates a task list.',
+      inputSchema: {
+        taskListId: z
+          .string()
+          .describe('The ID of the task list to update.'),
+        title: z.string().describe('The new title for the task list.'),
+      },
+    },
+    tasksService.updateTaskList,
+  );
+
+  server.registerTool(
+    'tasks.deleteTaskList',
+    {
+      description: 'Deletes a task list.',
+      inputSchema: {
+        taskListId: z
+          .string()
+          .describe('The ID of the task list to delete.'),
+      },
+    },
+    tasksService.deleteTaskList,
+  );
+
+  server.registerTool(
+    'tasks.listTasks',
+    {
+      description: 'Lists tasks from a task list. Supports filtering by completion status and due date.',
+      inputSchema: {
+        taskListId: z
+          .string()
+          .describe('The ID of the task list to list tasks from.'),
+        maxResults: z
+          .number()
+          .optional()
+          .describe(
+            `Maximum number of tasks to return (default: ${TASKS_LIST_MAX_RESULTS}).`,
+          ),
+        pageToken: z
+          .string()
+          .optional()
+          .describe('Token for the next page of results.'),
+        showCompleted: z
+          .boolean()
+          .optional()
+          .describe('Whether to include completed tasks (default: true).'),
+        showHidden: z
+          .boolean()
+          .optional()
+          .describe('Whether to include hidden tasks.'),
+        dueMin: z
+          .string()
+          .optional()
+          .describe(
+            'Lower bound for task due date (RFC 3339 timestamp).',
+          ),
+        dueMax: z
+          .string()
+          .optional()
+          .describe(
+            'Upper bound for task due date (RFC 3339 timestamp).',
+          ),
+      },
+      ...readOnlyToolProps,
+    },
+    tasksService.listTasks,
+  );
+
+  server.registerTool(
+    'tasks.getTask',
+    {
+      description: 'Gets a specific task by ID.',
+      inputSchema: {
+        taskListId: z
+          .string()
+          .describe('The ID of the task list containing the task.'),
+        taskId: z.string().describe('The ID of the task to retrieve.'),
+      },
+      ...readOnlyToolProps,
+    },
+    tasksService.getTask,
+  );
+
+  server.registerTool(
+    'tasks.createTask',
+    {
+      description: 'Creates a new task in a task list.',
+      inputSchema: {
+        taskListId: z
+          .string()
+          .describe('The ID of the task list to create the task in.'),
+        title: z.string().describe('The title of the new task.'),
+        notes: z
+          .string()
+          .optional()
+          .describe('Optional notes for the task.'),
+        due: z
+          .string()
+          .optional()
+          .describe('Due date in RFC 3339 format (e.g., 2024-12-31T23:59:59Z).'),
+        parent: z
+          .string()
+          .optional()
+          .describe('Parent task ID for subtasks.'),
+        previous: z
+          .string()
+          .optional()
+          .describe('Task ID to insert the new task after.'),
+      },
+    },
+    tasksService.createTask,
+  );
+
+  server.registerTool(
+    'tasks.updateTask',
+    {
+      description: 'Updates a task. Can update title, notes, status, or due date.',
+      inputSchema: {
+        taskListId: z
+          .string()
+          .describe('The ID of the task list containing the task.'),
+        taskId: z.string().describe('The ID of the task to update.'),
+        title: z
+          .string()
+          .optional()
+          .describe('The new title for the task.'),
+        notes: z
+          .string()
+          .optional()
+          .describe('The new notes for the task.'),
+        status: z
+          .enum(['needsAction', 'completed'])
+          .optional()
+          .describe('Task status. Use "completed" to mark as done.'),
+        due: z
+          .string()
+          .optional()
+          .describe('New due date in RFC 3339 format.'),
+      },
+    },
+    tasksService.updateTask,
+  );
+
+  server.registerTool(
+    'tasks.deleteTask',
+    {
+      description: 'Deletes a task from a task list.',
+      inputSchema: {
+        taskListId: z
+          .string()
+          .describe('The ID of the task list containing the task.'),
+        taskId: z.string().describe('The ID of the task to delete.'),
+      },
+    },
+    tasksService.deleteTask,
+  );
+
+  server.registerTool(
+    'tasks.clearCompletedTasks',
+    {
+      description: 'Clears all completed tasks from a task list.',
+      inputSchema: {
+        taskListId: z
+          .string()
+          .describe('The ID of the task list to clear completed tasks from.'),
+      },
+    },
+    tasksService.clearCompletedTasks,
+  );
+
+  server.registerTool(
+    'tasks.moveTask',
+    {
+      description:
+        'Moves a task to a new position within the same list or to a different task list.',
+      inputSchema: {
+        taskListId: z
+          .string()
+          .describe('The ID of the task list containing the task.'),
+        taskId: z.string().describe('The ID of the task to move.'),
+        destinationTaskListId: z
+          .string()
+          .optional()
+          .describe('The ID of the destination task list (optional, for cross-list move).'),
+        parent: z
+          .string()
+          .optional()
+          .describe('Parent task ID for the new position (for subtasks).'),
+        previous: z
+          .string()
+          .optional()
+          .describe('Task ID to insert the task after.'),
+      },
+    },
+    tasksService.moveTask,
   );
 
   // Gmail tools

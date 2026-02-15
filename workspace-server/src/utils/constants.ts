@@ -5,3 +5,5 @@
  */
 
 export const GMAIL_SEARCH_MAX_RESULTS = 100;
+
+export const TASKS_LIST_MAX_RESULTS = 100;
