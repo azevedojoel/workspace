@@ -86,13 +86,24 @@ export class AuthManager {
 
     // When running under LibreChat (or similar), credentials may be passed via env.
     // Skip keychain/OAuth flow and use env token directly.
-    const envAccessToken =
+    const rawEnvToken =
       process.env.GOOGLE_ACCESS_TOKEN ||
       process.env.LIBRECHAT_MCP_OAUTH_ACCESS_TOKEN;
+    // Reject placeholder - LibreChat injects the real token only when OAuth is complete
+    const isPlaceholder = !!(
+      rawEnvToken &&
+      (rawEnvToken.includes('{{') || rawEnvToken.length < 50)
+    );
+    if (isPlaceholder) {
+      throw new Error(
+        'Google Workspace requires authorization. Please complete the OAuth flow in LibreChat (connect the google-workspace MCP server in Settings or when prompted).',
+      );
+    }
+    const envAccessToken = rawEnvToken || undefined;
     if (envAccessToken) {
       logToFile('Using access token from environment (GOOGLE_ACCESS_TOKEN or LIBRECHAT_MCP_OAUTH_ACCESS_TOKEN)');
       const oAuth2Client = new google.auth.OAuth2({
-        clientId: getClientId(),
+        clientId: CLIENT_ID,
       });
       oAuth2Client.setCredentials({ access_token: envAccessToken });
       this.client = oAuth2Client;

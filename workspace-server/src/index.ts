@@ -47,17 +47,20 @@ const emailComposeSchema = {
 };
 
 const SCOPES = [
+  'https://www.googleapis.com/auth/userinfo.profile',
+  'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/documents',
   'https://www.googleapis.com/auth/drive',
   'https://www.googleapis.com/auth/calendar',
   'https://www.googleapis.com/auth/chat.spaces',
   'https://www.googleapis.com/auth/chat.messages',
   'https://www.googleapis.com/auth/chat.memberships',
-  'https://www.googleapis.com/auth/userinfo.profile',
   'https://www.googleapis.com/auth/gmail.modify',
-  'https://www.googleapis.com/auth/directory.readonly',
-  'https://www.googleapis.com/auth/presentations.readonly',
-  'https://www.googleapis.com/auth/spreadsheets.readonly',
+  'https://www.googleapis.com/auth/gmail.labels',
+  'https://www.googleapis.com/auth/contacts',
+  'https://www.googleapis.com/auth/presentations',
+  'https://www.googleapis.com/auth/spreadsheets',
+  'https://www.googleapis.com/auth/tasks',
 ];
 
 // Dynamically import version from package.json
