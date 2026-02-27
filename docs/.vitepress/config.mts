@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress';
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   base: '/workspace/',
-  title: 'Gemini Workspace Extension',
+  title: 'Google Workspace MCP Server',
   description: 'Documentation for the Google Workspace Server Extension',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config

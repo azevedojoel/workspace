@@ -141,13 +141,9 @@ gemini --debug
 
 ### Tool Naming
 
-Tool names in source use dot notation (e.g., `docs.create`) for logical
-grouping. By default, these are normalized to underscores at runtime (e.g.,
-`docs_create`) for compatibility with a broader set of applications that use MCP
-including Google Antigravity.
-
-When the server is run as a Gemini CLI extension the `--use-dot-names` flag is
-used to maintain dot notation and avoid breaking existing configurations.
+Tool names use underscore notation (e.g., `docs_create`, `gmail_send`) because
+LLM APIs (OpenAI, Anthropic) reject dots in tool names. All tool names are
+passed through unchanged at runtime.
 
 ### Project Structure
 

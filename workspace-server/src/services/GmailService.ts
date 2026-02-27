@@ -10,6 +10,7 @@ import * as path from 'node:path';
 import { AuthManager } from '../auth/AuthManager';
 import { logToFile } from '../utils/logger';
 import { MimeHelper } from '../utils/MimeHelper';
+import { stripHtmlToPlainText } from '../utils/stripHtml';
 import { GMAIL_SEARCH_MAX_RESULTS } from '../utils/constants';
 import { gaxiosOptions } from '../utils/GaxiosConfig';
 import { emailArraySchema } from '../utils/validation';
@@ -285,6 +286,51 @@ export class GmailService {
       };
     } catch (error) {
       return this.handleError(error, 'gmail.modify');
+    }
+  };
+
+  public batchModify = async ({
+    ids,
+    addLabelIds = [],
+    removeLabelIds = [],
+  }: {
+    ids: string[];
+    addLabelIds?: string[];
+    removeLabelIds?: string[];
+  }) => {
+    try {
+      logToFile(
+        `Batch modifying ${ids.length} messages with addLabelIds: ${addLabelIds}, removeLabelIds: ${removeLabelIds}`,
+      );
+
+      const gmail = await this.getGmailClient();
+      await gmail.users.messages.batchModify({
+        userId: 'me',
+        requestBody: {
+          ids,
+          addLabelIds,
+          removeLabelIds,
+        },
+      });
+
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify(
+              {
+                modifiedCount: ids.length,
+                addLabelIds,
+                removeLabelIds,
+              },
+              null,
+              2,
+            ),
+          },
+        ],
+      };
+    } catch (error) {
+      return this.handleError(error, 'gmail.batchModify');
     }
   };
 
@@ -601,9 +647,13 @@ export class GmailService {
         if (payload.mimeType?.startsWith('text/')) {
           // Prioritize plain text over HTML for direct body extraction
           if (!result.body || payload.mimeType === 'text/plain') {
-            result.body = Buffer.from(payload.body.data, 'base64').toString(
+            let bodyText = Buffer.from(payload.body.data, 'base64').toString(
               'utf-8',
             );
+            if (payload.mimeType === 'text/html') {
+              bodyText = stripHtmlToPlainText(bodyText, { maxLength: 2000 });
+            }
+            result.body = bodyText;
           }
         }
       }

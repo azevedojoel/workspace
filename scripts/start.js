@@ -47,7 +47,7 @@ async function main() {
       'dist',
       'index.js',
     );
-    await runCommand('node', [SERVER_PATH, '--debug', '--use-dot-names'], {
+    await runCommand('node', [SERVER_PATH, '--debug'], {
       stdio: 'inherit',
     });
   } catch (error) {

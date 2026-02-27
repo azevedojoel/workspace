@@ -1,7 +1,6 @@
-# Google Workspace Extension Documentation
+# Google Workspace MCP Server Documentation
 
-This document provides an overview of the Google Workspace extension for Gemini
-CLI.
+This document provides an overview of the Google Workspace MCP Server.
 
 ## Available Tools
 
@@ -9,87 +8,87 @@ The extension provides the following tools:
 
 ### Google Docs
 
-- `docs.create`: Creates a new Google Doc.
-- `docs.insertText`: Inserts text at the beginning of a Google Doc.
-- `docs.find`: Finds Google Docs by searching for a query in their title.
-- `docs.move`: Moves a document to a specified folder.
-- `docs.getText`: Retrieves the text content of a Google Doc.
-- `docs.appendText`: Appends text to the end of a Google Doc.
-- `docs.replaceText`: Replaces all occurrences of a given text with new text in
+- `docs_create`: Creates a new Google Doc.
+- `docs_insertText`: Inserts text at the beginning of a Google Doc.
+- `docs_find`: Finds Google Docs by searching for a query in their title.
+- `docs_move`: Moves a document to a specified folder.
+- `docs_getText`: Retrieves the text content of a Google Doc.
+- `docs_appendText`: Appends text to the end of a Google Doc.
+- `docs_replaceText`: Replaces all occurrences of a given text with new text in
   a Google Doc.
-- `docs.extractIdFromUrl`: Extracts the document ID from a Google Workspace URL.
+- `docs_extractIdFromUrl`: Extracts the document ID from a Google Workspace URL.
 
 ### Google Slides
 
-- `slides.getText`: Retrieves the text content of a Google Slides presentation.
-- `slides.find`: Finds Google Slides presentations by searching for a query.
-- `slides.getMetadata`: Gets metadata about a Google Slides presentation.
+- `slides_getText`: Retrieves the text content of a Google Slides presentation.
+- `slides_find`: Finds Google Slides presentations by searching for a query.
+- `slides_getMetadata`: Gets metadata about a Google Slides presentation.
 
 ### Google Sheets
 
-- `sheets.getText`: Retrieves the content of a Google Sheets spreadsheet.
-- `sheets.getRange`: Gets values from a specific range in a Google Sheets
+- `sheets_getText`: Retrieves the content of a Google Sheets spreadsheet.
+- `sheets_getRange`: Gets values from a specific range in a Google Sheets
   spreadsheet.
-- `sheets.find`: Finds Google Sheets spreadsheets by searching for a query.
-- `sheets.getMetadata`: Gets metadata about a Google Sheets spreadsheet.
+- `sheets_find`: Finds Google Sheets spreadsheets by searching for a query.
+- `sheets_getMetadata`: Gets metadata about a Google Sheets spreadsheet.
 
 ### Google Drive
 
-- `drive.search`: Searches for files and folders in Google Drive.
-- `drive.findFolder`: Finds a folder by name in Google Drive.
-- `drive.createFolder`: Creates a new folder in Google Drive.
-- `drive.downloadFile`: Downloads a file from Google Drive to a local path.
+- `drive_search`: Searches for files and folders in Google Drive.
+- `drive_findFolder`: Finds a folder by name in Google Drive.
+- `drive_createFolder`: Creates a new folder in Google Drive.
+- `drive_downloadFile`: Downloads a file from Google Drive to a local path.
 
 ### Google Calendar
 
-- `calendar.list`: Lists all of the user's calendars.
-- `calendar.createEvent`: Creates a new event in a calendar.
-- `calendar.listEvents`: Lists events from a calendar.
-- `calendar.getEvent`: Gets the details of a specific calendar event.
-- `calendar.findFreeTime`: Finds a free time slot for multiple people to meet.
-- `calendar.updateEvent`: Updates an existing event in a calendar.
-- `calendar.respondToEvent`: Responds to a meeting invitation (accept, decline,
+- `calendar_list`: Lists all of the user's calendars.
+- `calendar_createEvent`: Creates a new event in a calendar.
+- `calendar_listEvents`: Lists events from a calendar.
+- `calendar_getEvent`: Gets the details of a specific calendar event.
+- `calendar_findFreeTime`: Finds a free time slot for multiple people to meet.
+- `calendar_updateEvent`: Updates an existing event in a calendar.
+- `calendar_respondToEvent`: Responds to a meeting invitation (accept, decline,
   or tentative).
-- `calendar.deleteEvent`: Deletes an event from a calendar.
+- `calendar_deleteEvent`: Deletes an event from a calendar.
 
 ### Google Chat
 
-- `chat.listSpaces`: Lists the spaces the user is a member of.
-- `chat.findSpaceByName`: Finds a Google Chat space by its display name.
-- `chat.sendMessage`: Sends a message to a Google Chat space.
-- `chat.getMessages`: Gets messages from a Google Chat space.
-- `chat.sendDm`: Sends a direct message to a user.
-- `chat.findDmByEmail`: Finds a Google Chat DM space by a user's email address.
-- `chat.listThreads`: Lists threads from a Google Chat space in reverse
+- `chat_listSpaces`: Lists the spaces the user is a member of.
+- `chat_findSpaceByName`: Finds a Google Chat space by its display name.
+- `chat_sendMessage`: Sends a message to a Google Chat space.
+- `chat_getMessages`: Gets messages from a Google Chat space.
+- `chat_sendDm`: Sends a direct message to a user.
+- `chat_findDmByEmail`: Finds a Google Chat DM space by a user's email address.
+- `chat_listThreads`: Lists threads from a Google Chat space in reverse
   chronological order.
-- `chat.setUpSpace`: Sets up a new Google Chat space with a display name and a
+- `chat_setUpSpace`: Sets up a new Google Chat space with a display name and a
   list of members.
 
 ### Gmail
 
-- `gmail.search`: Search for emails in Gmail using query parameters.
-- `gmail.get`: Get the full content of a specific email message.
-- `gmail.downloadAttachment`: Downloads an attachment from a Gmail message to a
+- `gmail_search`: Search for emails in Gmail using query parameters.
+- `gmail_get`: Get the full content of a specific email message.
+- `gmail_downloadAttachment`: Downloads an attachment from a Gmail message to a
   local file.
-- `gmail.modify`: Modify a Gmail message.
-- `gmail.send`: Send an email message.
-- `gmail.createDraft`: Create a draft email message.
-- `gmail.sendDraft`: Send a previously created draft email.
-- `gmail.listLabels`: List all Gmail labels in the user's mailbox.
+- `gmail_modify`: Modify a Gmail message.
+- `gmail_send`: Send an email message.
+- `gmail_createDraft`: Create a draft email message.
+- `gmail_sendDraft`: Send a previously created draft email.
+- `gmail_listLabels`: List all Gmail labels in the user's mailbox.
 
 ### Time
 
-- `time.getCurrentDate`: Gets the current date. Returns both UTC (for API use)
+- `time_getCurrentDate`: Gets the current date. Returns both UTC (for API use)
   and local time (for user display), along with the timezone.
-- `time.getCurrentTime`: Gets the current time. Returns both UTC (for API use)
+- `time_getCurrentTime`: Gets the current time. Returns both UTC (for API use)
   and local time (for user display), along with the timezone.
-- `time.getTimeZone`: Gets the local timezone.
+- `time_getTimeZone`: Gets the local timezone.
 
 ### People
 
-- `people.getUserProfile`: Gets a user's profile information.
-- `people.getMe`: Gets the profile information of the authenticated user.
-- `people.getUserRelations`: Gets a user's relations (e.g., manager, spouse,
+- `people_getUserProfile`: Gets a user's profile information.
+- `people_getMe`: Gets the profile information of the authenticated user.
+- `people_getUserRelations`: Gets a user's relations (e.g., manager, spouse,
   assistant). Defaults to the authenticated user and supports filtering by
   relation type.
 

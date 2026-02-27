@@ -49,6 +49,7 @@ describe('GmailService', () => {
           untrash: jest.fn(),
           delete: jest.fn(),
           modify: jest.fn(),
+          batchModify: jest.fn(),
           attachments: {
             get: jest.fn(),
           },
@@ -581,6 +582,46 @@ describe('GmailService', () => {
 
       const response = JSON.parse(result.content[0].text);
       expect(response.error).toBe('Message not found');
+    });
+  });
+
+  describe('batchModify', () => {
+    it('should modify labels on multiple messages', async () => {
+      mockGmailAPI.users.messages.batchModify.mockResolvedValue({});
+
+      const result = await gmailService.batchModify({
+        ids: ['msg1', 'msg2', 'msg3'],
+        addLabelIds: ['UNREAD'],
+        removeLabelIds: ['INBOX'],
+      });
+
+      expect(mockGmailAPI.users.messages.batchModify).toHaveBeenCalledWith({
+        userId: 'me',
+        requestBody: {
+          ids: ['msg1', 'msg2', 'msg3'],
+          addLabelIds: ['UNREAD'],
+          removeLabelIds: ['INBOX'],
+        },
+      });
+
+      const response = JSON.parse(result.content[0].text);
+      expect(response.modifiedCount).toBe(3);
+      expect(response.addLabelIds).toEqual(['UNREAD']);
+      expect(response.removeLabelIds).toEqual(['INBOX']);
+    });
+
+    it('should handle batchModify API errors', async () => {
+      mockGmailAPI.users.messages.batchModify.mockRejectedValue(
+        new Error('Batch modify failed'),
+      );
+
+      const result = await gmailService.batchModify({
+        ids: ['msg1'],
+        addLabelIds: ['TRASH'],
+      });
+
+      const response = JSON.parse(result.content[0].text);
+      expect(response.error).toBe('Batch modify failed');
     });
   });
 

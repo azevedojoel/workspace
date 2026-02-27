@@ -82,30 +82,6 @@ const main = async () => {
     }
   });
 
-  const packageJson = require('../package.json');
-  const version = (process.env.GITHUB_REF_NAME || packageJson.version).replace(
-    /^v/,
-    '',
-  );
-
-  // Generate the gemini-extension.json file
-  const geminiExtensionJson = {
-    name: 'google-workspace',
-    version,
-    contextFileName: 'WORKSPACE-Context.md',
-    mcpServers: {
-      'google-workspace': {
-        command: 'node',
-        args: ['dist/index.js', '--use-dot-names'],
-        cwd: '${extensionPath}',
-      },
-    },
-  };
-  fs.writeFileSync(
-    path.join(archiveDir, 'gemini-extension.json'),
-    JSON.stringify(geminiExtensionJson, null, 2),
-  );
-
   // Copy the WORKSPACE-Context.md file
   fs.copyFileSync(
     path.join(workspaceMcpServerDir, 'WORKSPACE-Context.md'),

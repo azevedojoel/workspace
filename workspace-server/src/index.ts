@@ -24,7 +24,6 @@ import { GMAIL_SEARCH_MAX_RESULTS, TASKS_LIST_MAX_RESULTS } from './utils/consta
 import { extractDocId } from './utils/IdUtils';
 
 import { setLoggingEnabled } from './utils/logger';
-import { applyToolNameNormalization } from './utils/tool-normalization';
 
 // Shared schemas for Gmail tools
 const emailComposeSchema = {
@@ -109,14 +108,9 @@ async function main() {
   const sheetsService = new SheetsService(authManager);
   const tasksService = new TasksService(authManager);
 
-  // 3. Register tools directly on the server
-  // Handle tool name normalization (dots to underscores) by default, or use dots if --use-dot-names is passed.
-  const useDotNames = process.argv.includes('--use-dot-names');
-  const separator = useDotNames ? '.' : '_';
-  applyToolNameNormalization(server, useDotNames);
-
+  // 3. Register tools directly on the server (underscore notation - LLM APIs reject dots)
   server.registerTool(
-    'auth.clear',
+    'auth_clear',
     {
       description:
         'Clears the authentication credentials, forcing a re-login on the next request.',
@@ -136,7 +130,7 @@ async function main() {
   );
 
   server.registerTool(
-    'auth.refreshToken',
+    'auth_refreshToken',
     {
       description: 'Manually triggers the token refresh process.',
       inputSchema: {},
@@ -155,7 +149,7 @@ async function main() {
   );
 
   server.registerTool(
-    'docs.create',
+    'docs_create',
     {
       description:
         'Creates a new Google Doc. Can be blank or with Markdown content.',
@@ -175,7 +169,7 @@ async function main() {
   );
 
   server.registerTool(
-    'docs.insertText',
+    'docs_insertText',
     {
       description: 'Inserts text at the beginning of a Google Doc.',
       inputSchema: {
@@ -195,7 +189,7 @@ async function main() {
   );
 
   server.registerTool(
-    'docs.find',
+    'docs_find',
     {
       description:
         'Finds Google Docs by searching for a query in their title. Supports pagination.',
@@ -218,7 +212,7 @@ async function main() {
   );
 
   server.registerTool(
-    'drive.findFolder',
+    'drive_findFolder',
     {
       description: 'Finds a folder by name in Google Drive.',
       inputSchema: {
@@ -230,7 +224,7 @@ async function main() {
   );
 
   server.registerTool(
-    'drive.createFolder',
+    'drive_createFolder',
     {
       description: 'Creates a new folder in Google Drive.',
       inputSchema: {
@@ -249,7 +243,7 @@ async function main() {
   );
 
   server.registerTool(
-    'docs.move',
+    'docs_move',
     {
       description: 'Moves a document to a specified folder.',
       inputSchema: {
@@ -261,7 +255,7 @@ async function main() {
   );
 
   server.registerTool(
-    'docs.getText',
+    'docs_getText',
     {
       description: 'Retrieves the text content of a Google Doc.',
       inputSchema: {
@@ -279,7 +273,7 @@ async function main() {
   );
 
   server.registerTool(
-    'docs.appendText',
+    'docs_appendText',
     {
       description: 'Appends text to the end of a Google Doc.',
       inputSchema: {
@@ -297,7 +291,7 @@ async function main() {
   );
 
   server.registerTool(
-    'docs.replaceText',
+    'docs_replaceText',
     {
       description:
         'Replaces all occurrences of a given text with new text in a Google Doc.',
@@ -319,7 +313,7 @@ async function main() {
   );
 
   server.registerTool(
-    'docs.extractIdFromUrl',
+    'docs_extractIdFromUrl',
     {
       description: 'Extracts the document ID from a Google Workspace URL.',
       inputSchema: {
@@ -342,7 +336,7 @@ async function main() {
 
   // Slides tools
   server.registerTool(
-    'slides.getText',
+    'slides_getText',
     {
       description:
         'Retrieves the text content of a Google Slides presentation.',
@@ -357,7 +351,7 @@ async function main() {
   );
 
   server.registerTool(
-    'slides.find',
+    'slides_find',
     {
       description:
         'Finds Google Slides presentations by searching for a query. Supports pagination.',
@@ -378,7 +372,7 @@ async function main() {
   );
 
   server.registerTool(
-    'slides.getMetadata',
+    'slides_getMetadata',
     {
       description: 'Gets metadata about a Google Slides presentation.',
       inputSchema: {
@@ -392,7 +386,7 @@ async function main() {
   );
 
   server.registerTool(
-    'slides.getImages',
+    'slides_getImages',
     {
       description:
         'Downloads all images embedded in a Google Slides presentation to a local directory.',
@@ -413,7 +407,7 @@ async function main() {
   );
 
   server.registerTool(
-    'slides.getSlideThumbnail',
+    'slides_getSlideThumbnail',
     {
       description:
         'Downloads a thumbnail image for a specific slide in a Google Slides presentation to a local path.',
@@ -438,7 +432,7 @@ async function main() {
 
   // Sheets tools
   server.registerTool(
-    'sheets.getText',
+    'sheets_getText',
     {
       description: 'Retrieves the content of a Google Sheets spreadsheet.',
       inputSchema: {
@@ -456,7 +450,7 @@ async function main() {
   );
 
   server.registerTool(
-    'sheets.getRange',
+    'sheets_getRange',
     {
       description:
         'Gets values from a specific range in a Google Sheets spreadsheet.',
@@ -472,7 +466,7 @@ async function main() {
   );
 
   server.registerTool(
-    'sheets.find',
+    'sheets_find',
     {
       description:
         'Finds Google Sheets spreadsheets by searching for a query. Supports pagination.',
@@ -493,7 +487,7 @@ async function main() {
   );
 
   server.registerTool(
-    'sheets.getMetadata',
+    'sheets_getMetadata',
     {
       description: 'Gets metadata about a Google Sheets spreadsheet.',
       inputSchema: {
@@ -505,7 +499,7 @@ async function main() {
   );
 
   server.registerTool(
-    'drive.search',
+    'drive_search',
     {
       description:
         'Searches for files and folders in Google Drive. The query can be a simple search term, a Google Drive URL, or a full query string. For more information on query strings see: https://developers.google.com/drive/api/guides/search-files',
@@ -543,7 +537,7 @@ async function main() {
   );
 
   server.registerTool(
-    'drive.downloadFile',
+    'drive_downloadFile',
     {
       description:
         'Downloads the content of a file from Google Drive to a local path. Note: Google Docs, Sheets, and Slides require specialized handling.',
@@ -560,7 +554,7 @@ async function main() {
   );
 
   server.registerTool(
-    'calendar.list',
+    'calendar_list',
     {
       description: "Lists all of the user's calendars.",
       inputSchema: {},
@@ -570,7 +564,7 @@ async function main() {
   );
 
   server.registerTool(
-    'calendar.createEvent',
+    'calendar_createEvent',
     {
       description: 'Creates a new event in a calendar.',
       inputSchema: {
@@ -606,7 +600,7 @@ async function main() {
   );
 
   server.registerTool(
-    'calendar.listEvents',
+    'calendar_listEvents',
     {
       description: 'Lists events from a calendar. Defaults to upcoming events.',
       inputSchema: {
@@ -634,7 +628,7 @@ async function main() {
   );
 
   server.registerTool(
-    'calendar.getEvent',
+    'calendar_getEvent',
     {
       description: 'Gets the details of a specific calendar event.',
       inputSchema: {
@@ -652,7 +646,7 @@ async function main() {
   );
 
   server.registerTool(
-    'calendar.findFreeTime',
+    'calendar_findFreeTime',
     {
       description: 'Finds a free time slot for multiple people to meet.',
       inputSchema: {
@@ -679,7 +673,7 @@ async function main() {
   );
 
   server.registerTool(
-    'calendar.updateEvent',
+    'calendar_updateEvent',
     {
       description: 'Updates an existing event in a calendar.',
       inputSchema: {
@@ -724,7 +718,7 @@ async function main() {
   );
 
   server.registerTool(
-    'calendar.respondToEvent',
+    'calendar_respondToEvent',
     {
       description:
         'Responds to a meeting invitation (accept, decline, or tentative).',
@@ -753,7 +747,7 @@ async function main() {
   );
 
   server.registerTool(
-    'calendar.deleteEvent',
+    'calendar_deleteEvent',
     {
       description: 'Deletes an event from a calendar.',
       inputSchema: {
@@ -770,7 +764,7 @@ async function main() {
   );
 
   server.registerTool(
-    'chat.listSpaces',
+    'chat_listSpaces',
     {
       description: 'Lists the spaces the user is a member of.',
       inputSchema: {},
@@ -780,7 +774,7 @@ async function main() {
   );
 
   server.registerTool(
-    'chat.findSpaceByName',
+    'chat_findSpaceByName',
     {
       description: 'Finds a Google Chat space by its display name.',
       inputSchema: {
@@ -794,7 +788,7 @@ async function main() {
   );
 
   server.registerTool(
-    'chat.sendMessage',
+    'chat_sendMessage',
     {
       description: 'Sends a message to a Google Chat space.',
       inputSchema: {
@@ -816,7 +810,7 @@ async function main() {
   );
 
   server.registerTool(
-    'chat.getMessages',
+    'chat_getMessages',
     {
       description: 'Gets messages from a Google Chat space.',
       inputSchema: {
@@ -854,7 +848,7 @@ async function main() {
   );
 
   server.registerTool(
-    'chat.sendDm',
+    'chat_sendDm',
     {
       description: 'Sends a direct message to a user.',
       inputSchema: {
@@ -875,7 +869,7 @@ async function main() {
   );
 
   server.registerTool(
-    'chat.findDmByEmail',
+    'chat_findDmByEmail',
     {
       description: "Finds a Google Chat DM space by a user's email address.",
       inputSchema: {
@@ -890,7 +884,7 @@ async function main() {
   );
 
   server.registerTool(
-    'chat.listThreads',
+    'chat_listThreads',
     {
       description:
         'Lists threads from a Google Chat space in reverse chronological order.',
@@ -915,7 +909,7 @@ async function main() {
   );
 
   server.registerTool(
-    'chat.setUpSpace',
+    'chat_setUpSpace',
     {
       description:
         'Sets up a new Google Chat space with a display name and a list of members.',
@@ -933,7 +927,7 @@ async function main() {
 
   // Google Tasks tools
   server.registerTool(
-    'tasks.listTaskLists',
+    'tasks_listTaskLists',
     {
       description: 'Lists all of the user\'s Google Tasks task lists.',
       inputSchema: {
@@ -952,7 +946,7 @@ async function main() {
   );
 
   server.registerTool(
-    'tasks.getTaskList',
+    'tasks_getTaskList',
     {
       description: 'Gets a specific task list by ID.',
       inputSchema: {
@@ -966,7 +960,7 @@ async function main() {
   );
 
   server.registerTool(
-    'tasks.createTaskList',
+    'tasks_createTaskList',
     {
       description: 'Creates a new task list.',
       inputSchema: {
@@ -977,7 +971,7 @@ async function main() {
   );
 
   server.registerTool(
-    'tasks.updateTaskList',
+    'tasks_updateTaskList',
     {
       description: 'Updates a task list.',
       inputSchema: {
@@ -991,7 +985,7 @@ async function main() {
   );
 
   server.registerTool(
-    'tasks.deleteTaskList',
+    'tasks_deleteTaskList',
     {
       description: 'Deletes a task list.',
       inputSchema: {
@@ -1004,7 +998,7 @@ async function main() {
   );
 
   server.registerTool(
-    'tasks.listTasks',
+    'tasks_listTasks',
     {
       description: 'Lists tasks from a task list. Supports filtering by completion status and due date.',
       inputSchema: {
@@ -1048,7 +1042,7 @@ async function main() {
   );
 
   server.registerTool(
-    'tasks.getTask',
+    'tasks_getTask',
     {
       description: 'Gets a specific task by ID.',
       inputSchema: {
@@ -1063,7 +1057,7 @@ async function main() {
   );
 
   server.registerTool(
-    'tasks.createTask',
+    'tasks_createTask',
     {
       description: 'Creates a new task in a task list.',
       inputSchema: {
@@ -1093,7 +1087,7 @@ async function main() {
   );
 
   server.registerTool(
-    'tasks.updateTask',
+    'tasks_updateTask',
     {
       description: 'Updates a task. Can update title, notes, status, or due date.',
       inputSchema: {
@@ -1123,7 +1117,7 @@ async function main() {
   );
 
   server.registerTool(
-    'tasks.deleteTask',
+    'tasks_deleteTask',
     {
       description: 'Deletes a task from a task list.',
       inputSchema: {
@@ -1137,7 +1131,7 @@ async function main() {
   );
 
   server.registerTool(
-    'tasks.clearCompletedTasks',
+    'tasks_clearCompletedTasks',
     {
       description: 'Clears all completed tasks from a task list.',
       inputSchema: {
@@ -1150,7 +1144,7 @@ async function main() {
   );
 
   server.registerTool(
-    'tasks.moveTask',
+    'tasks_moveTask',
     {
       description:
         'Moves a task to a new position within the same list or to a different task list.',
@@ -1178,7 +1172,7 @@ async function main() {
 
   // Gmail tools
   server.registerTool(
-    'gmail.search',
+    'gmail_search',
     {
       description: 'Search for emails in Gmail using query parameters.',
       inputSchema: {
@@ -1213,7 +1207,7 @@ async function main() {
   );
 
   server.registerTool(
-    'gmail.get',
+    'gmail_get',
     {
       description: 'Get the full content of a specific email message.',
       inputSchema: {
@@ -1229,7 +1223,7 @@ async function main() {
   );
 
   server.registerTool(
-    'gmail.downloadAttachment',
+    'gmail_downloadAttachment',
     {
       description:
         'Downloads an attachment from a Gmail message to a local file.',
@@ -1251,7 +1245,7 @@ async function main() {
   );
 
   server.registerTool(
-    'gmail.modify',
+    'gmail_modify',
     {
       description: `Modify a Gmail message. Supported modifications include:
     - Add labels to a message.
@@ -1289,7 +1283,37 @@ There are a list of system labels that can be modified on a message:
   );
 
   server.registerTool(
-    'gmail.send',
+    'gmail_batchModify',
+    {
+      description: `Modify labels on multiple Gmail messages in a single request (up to 1000 messages).
+Same label operations as gmail_modify, but applied to many messages at once.
+Use for: mark multiple as read, archive many, add label to search results, etc.
+System labels: INBOX, SPAM, TRASH, UNREAD, STARRED, IMPORTANT.`,
+      inputSchema: {
+        ids: z
+          .array(z.string())
+          .min(1)
+          .max(1000)
+          .describe(
+            'Array of message IDs to modify. Maximum 1000 per request.',
+          ),
+        addLabelIds: z
+          .array(z.string())
+          .max(100)
+          .optional()
+          .describe('Label IDs to add to all messages.'),
+        removeLabelIds: z
+          .array(z.string())
+          .max(100)
+          .optional()
+          .describe('Label IDs to remove from all messages.'),
+      },
+    },
+    gmailService.batchModify,
+  );
+
+  server.registerTool(
+    'gmail_send',
     {
       description: 'Send an email message.',
       inputSchema: emailComposeSchema,
@@ -1298,7 +1322,7 @@ There are a list of system labels that can be modified on a message:
   );
 
   server.registerTool(
-    'gmail.createDraft',
+    'gmail_createDraft',
     {
       description: 'Create a draft email message.',
       inputSchema: {
@@ -1315,7 +1339,7 @@ There are a list of system labels that can be modified on a message:
   );
 
   server.registerTool(
-    'gmail.sendDraft',
+    'gmail_sendDraft',
     {
       description: 'Send a previously created draft email.',
       inputSchema: {
@@ -1326,7 +1350,7 @@ There are a list of system labels that can be modified on a message:
   );
 
   server.registerTool(
-    'gmail.listLabels',
+    'gmail_listLabels',
     {
       description: "List all Gmail labels in the user's mailbox.",
       inputSchema: {},
@@ -1336,7 +1360,7 @@ There are a list of system labels that can be modified on a message:
   );
 
   server.registerTool(
-    'gmail.createLabel',
+    'gmail_createLabel',
     {
       description:
         'Create a new Gmail label. Labels help organize emails into categories.',
@@ -1361,7 +1385,7 @@ There are a list of system labels that can be modified on a message:
 
   // Time tools
   server.registerTool(
-    'time.getCurrentDate',
+    'time_getCurrentDate',
     {
       description:
         'Gets the current date. Returns both UTC (for calendar/API use) and local time (for display to the user), along with the timezone.',
@@ -1372,7 +1396,7 @@ There are a list of system labels that can be modified on a message:
   );
 
   server.registerTool(
-    'time.getCurrentTime',
+    'time_getCurrentTime',
     {
       description:
         'Gets the current time. Returns both UTC (for calendar/API use) and local time (for display to the user), along with the timezone.',
@@ -1383,7 +1407,7 @@ There are a list of system labels that can be modified on a message:
   );
 
   server.registerTool(
-    'time.getTimeZone',
+    'time_getTimeZone',
     {
       description:
         'Gets the local timezone. Note: timezone is also included in getCurrentDate and getCurrentTime responses.',
@@ -1395,7 +1419,7 @@ There are a list of system labels that can be modified on a message:
 
   // People tools
   server.registerTool(
-    'people.getUserProfile',
+    'people_getUserProfile',
     {
       description: "Gets a user's profile information.",
       inputSchema: {
@@ -1420,7 +1444,7 @@ There are a list of system labels that can be modified on a message:
   );
 
   server.registerTool(
-    'people.getMe',
+    'people_getMe',
     {
       description: 'Gets the profile information of the authenticated user.',
       inputSchema: {},
@@ -1430,7 +1454,7 @@ There are a list of system labels that can be modified on a message:
   );
 
   server.registerTool(
-    'people.getUserRelations',
+    'people_getUserRelations',
     {
       description:
         "Gets a user's relations (e.g., manager, spouse, assistant, etc.). Common relation types include: manager, assistant, spouse, partner, relative, mother, father, parent, sibling, child, friend, domesticPartner, referredBy. Defaults to the authenticated user if no userId is provided.",
@@ -1458,7 +1482,7 @@ There are a list of system labels that can be modified on a message:
   await server.connect(transport);
 
   console.error(
-    `Google Workspace MCP Server is running (using ${separator} for tool names). Listening for requests...`,
+    'Google Workspace MCP Server is running (underscore notation for tool names). Listening for requests...',
   );
 }
 
