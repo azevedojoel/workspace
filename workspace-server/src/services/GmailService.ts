@@ -11,7 +11,10 @@ import { AuthManager } from '../auth/AuthManager';
 import { logToFile } from '../utils/logger';
 import { MimeHelper } from '../utils/MimeHelper';
 import { stripHtmlToPlainText } from '../utils/stripHtml';
-import { GMAIL_SEARCH_MAX_RESULTS } from '../utils/constants';
+import {
+  GMAIL_SEARCH_MAX_RESULTS,
+  GMAIL_SEARCH_METADATA_LIMIT,
+} from '../utils/constants';
 import { gaxiosOptions } from '../utils/GaxiosConfig';
 import { emailArraySchema } from '../utils/validation';
 
@@ -95,16 +98,45 @@ export class GmailService {
         `Found ${messages.length} messages, estimated total: ${resultSizeEstimate}`,
       );
 
+      const toFetch = messages.slice(0, GMAIL_SEARCH_METADATA_LIMIT);
+      const rest = messages.slice(GMAIL_SEARCH_METADATA_LIMIT);
+
+      const enriched = await Promise.all(
+        toFetch.map(async (msg) => {
+          try {
+            const meta = await gmail.users.messages.get({
+              userId: 'me',
+              id: msg.id!,
+              format: 'metadata',
+            });
+            const headers = meta.data.payload?.headers || [];
+            const getHeader = (name: string) =>
+              headers.find((h) => h.name?.toLowerCase() === name.toLowerCase())
+                ?.value;
+            return {
+              id: msg.id,
+              threadId: msg.threadId,
+              subject: getHeader('Subject'),
+              snippet: meta.data.snippet,
+            };
+          } catch {
+            return { id: msg.id, threadId: msg.threadId };
+          }
+        }),
+      );
+
+      const allMessages = [
+        ...enriched,
+        ...rest.map((msg) => ({ id: msg.id, threadId: msg.threadId })),
+      ];
+
       return {
         content: [
           {
             type: 'text' as const,
             text: JSON.stringify(
               {
-                messages: messages.map((msg) => ({
-                  id: msg.id,
-                  threadId: msg.threadId,
-                })),
+                messages: allMessages,
                 nextPageToken,
                 resultSizeEstimate,
               },
@@ -651,7 +683,7 @@ export class GmailService {
               'utf-8',
             );
             if (payload.mimeType === 'text/html') {
-              bodyText = stripHtmlToPlainText(bodyText, { maxLength: 2000 });
+              bodyText = stripHtmlToPlainText(bodyText, { maxLength: 10000 });
             }
             result.body = bodyText;
           }
