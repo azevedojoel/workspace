@@ -96,7 +96,7 @@ export class AuthManager {
     );
     if (isPlaceholder) {
       throw new Error(
-        'Google Workspace requires authorization. Please complete the OAuth flow in LibreChat (connect the google-workspace MCP server in Settings or when prompted).',
+        'Google Workspace requires authorization. Please complete the OAuth flow in Daily Thread (connect the google-workspace MCP server in Settings or when prompted).',
       );
     }
     const envAccessToken = rawEnvToken || undefined;
