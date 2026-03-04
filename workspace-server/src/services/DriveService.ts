@@ -348,12 +348,16 @@ export class DriveService {
 
   public downloadFile = async ({
     fileId,
+    destination = 'path',
     localPath,
+    workspace_path,
   }: {
     fileId: string;
-    localPath: string;
+    destination?: 'workspace' | 'my_files' | 'path';
+    localPath?: string;
+    workspace_path?: string;
   }) => {
-    logToFile(`Downloading Drive file ${fileId} to ${localPath}`);
+    logToFile(`Downloading Drive file ${fileId} (destination: ${destination})`);
     try {
       const drive = await this.getDriveClient();
       const id = extractDocumentId(fileId);
@@ -421,22 +425,83 @@ export class DriveService {
       );
 
       const buffer = Buffer.from(response.data as unknown as ArrayBuffer);
+      const fileName = metadata.data.name || 'downloaded_file';
 
-      // 3. Save to localPath
+      if (destination === 'workspace') {
+        if (!workspace_path) {
+          return {
+            content: [
+              {
+                type: 'text' as const,
+                text: JSON.stringify({
+                  error:
+                    'workspace_path is required when destination is "workspace". Ensure the conversation has a workspace session.',
+                }),
+              },
+            ],
+          };
+        }
+        const absolutePath = path.join(workspace_path, fileName);
+        await fs.promises.mkdir(path.dirname(absolutePath), { recursive: true });
+        await fs.promises.writeFile(absolutePath, buffer);
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Successfully downloaded ${fileName} to workspace.`,
+            },
+          ],
+        };
+      }
+
+      if (destination === 'my_files') {
+        const base64 = buffer.toString('base64');
+        const mime = mimeType || 'application/octet-stream';
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Successfully saved ${fileName} to My Files.`,
+            },
+            {
+              type: 'resource' as const,
+              resource: {
+                uri: `drive-file:${fileName}`,
+                blob: base64,
+                mimeType: mime,
+              },
+            },
+          ],
+        };
+      }
+
+      // destination === 'path' (or legacy)
+      if (!localPath) {
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: JSON.stringify({
+                error: 'localPath is required when destination is "path".',
+              }),
+            },
+          ],
+        };
+      }
+
       const absolutePath = path.isAbsolute(localPath)
         ? localPath
         : path.resolve(PROJECT_ROOT, localPath);
       const dir = path.dirname(absolutePath);
 
       await fs.promises.mkdir(dir, { recursive: true });
-
       await fs.promises.writeFile(absolutePath, buffer);
 
       return {
         content: [
           {
             type: 'text' as const,
-            text: `Successfully downloaded file ${metadata.data.name} to ${absolutePath}`,
+            text: `Successfully downloaded file ${fileName} to ${absolutePath}`,
           },
         ],
       };

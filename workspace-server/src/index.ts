@@ -540,13 +540,27 @@ async function main() {
     'drive_downloadFile',
     {
       description:
-        'Downloads the content of a file from Google Drive to a local path. Note: Google Docs, Sheets, and Slides require specialized handling.',
+        'Downloads a file from Google Drive. Use destination: "workspace" to put the file in the agent\'s coding workspace (for execute_code/workspace tools). Use "my_files" to save to the user\'s My Files. Use "path" for a custom local path. Google Docs, Sheets, and Slides require specialized tools.',
       inputSchema: {
         fileId: z.string().describe('The ID of the file to download.'),
+        destination: z
+          .enum(['workspace', 'my_files', 'path'])
+          .optional()
+          .default('path')
+          .describe(
+            'Where to save: "workspace" (agent coding env), "my_files" (user storage), or "path" (custom localPath).',
+          ),
         localPath: z
           .string()
+          .optional()
           .describe(
-            'The local file path where the content should be saved (e.g., "downloads/report.pdf").',
+            'Required when destination is "path". Local path (e.g. "downloads/report.pdf"). Ignored for workspace/my_files.',
+          ),
+        workspace_path: z
+          .string()
+          .optional()
+          .describe(
+            'Injected by LibreChat when destination is "workspace". Do not set manually.',
           ),
       },
     },
