@@ -113,10 +113,17 @@ export class GmailService {
             const getHeader = (name: string) =>
               headers.find((h) => h.name?.toLowerCase() === name.toLowerCase())
                 ?.value;
+            const labelIds = meta.data.labelIds ?? [];
+            const dateVal = getHeader('Date') ?? meta.data.internalDate;
             return {
               id: msg.id,
               threadId: msg.threadId,
               subject: getHeader('Subject'),
+              from: getHeader('From'),
+              date: dateVal,
+              isUnread: labelIds.includes('UNREAD'),
+              isStarred: labelIds.includes('STARRED'),
+              isImportant: labelIds.includes('IMPORTANT'),
               snippet: meta.data.snippet,
             };
           } catch {

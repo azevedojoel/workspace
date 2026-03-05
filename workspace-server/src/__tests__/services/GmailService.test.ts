@@ -207,6 +207,46 @@ describe('GmailService', () => {
       const response = JSON.parse(result.content[0].text);
       expect(response.error).toBe('Gmail API error');
     });
+
+    it('should enrich messages with from, date, and label flags', async () => {
+      mockGmailAPI.users.messages.list.mockResolvedValue({
+        data: {
+          messages: [{ id: 'msg1', threadId: 'thread1' }],
+        },
+      });
+      mockGmailAPI.users.messages.get.mockResolvedValue({
+        data: {
+          id: 'msg1',
+          threadId: 'thread1',
+          labelIds: ['INBOX', 'UNREAD', 'STARRED'],
+          internalDate: '1709568000000',
+          snippet: 'Email preview',
+          payload: {
+            headers: [
+              { name: 'Subject', value: 'Test' },
+              { name: 'From', value: 'sender@example.com' },
+              { name: 'Date', value: 'Wed, 04 Mar 2025 12:00:00 +0000' },
+            ],
+          },
+        },
+      });
+
+      const result = await gmailService.search({ query: 'test' });
+      const response = JSON.parse(result.content[0].text);
+
+      expect(response.messages).toHaveLength(1);
+      expect(response.messages[0]).toMatchObject({
+        id: 'msg1',
+        threadId: 'thread1',
+        subject: 'Test',
+        from: 'sender@example.com',
+        date: 'Wed, 04 Mar 2025 12:00:00 +0000',
+        isUnread: true,
+        isStarred: true,
+        isImportant: false,
+        snippet: 'Email preview',
+      });
+    });
   });
 
   describe('get', () => {
